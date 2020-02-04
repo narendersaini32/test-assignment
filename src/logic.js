@@ -34,9 +34,9 @@ function getInitials(nameString) {
 
 // below function validate date using regex
 function validateDate(s) {
-  const bits = s.split('/');
-  const d = new Date(bits[2], bits[1] - 1, bits[0]);
-  return d && (d.getMonth() + 1) == bits[1];
+        var temp = s.split('/');
+        var d = new Date(temp[2] + '/' + temp[0] + '/' + temp[1]);
+        return (d && (d.getMonth() + 1) == temp[0] && d.getDate() == Number(temp[1]) && d.getFullYear() == Number(temp[2]));
 }
 
 // below function is used to clearOldData
@@ -55,7 +55,6 @@ function clearOldData() {
 function createPersonDiv(name, birthday) {
   const initial = getInitials(name);
   const day = getDayForYear(birthday);
-  console.log('TCL: createPersonDiv -> day', day);
   const div = document.createElement('div');
   div.className = 'day__person';
   div.innerHTML = initial;
