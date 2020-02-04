@@ -10,7 +10,7 @@ export class Home extends Component {
 
     render() {
       return (
-        <div classNameName="home">
+        <div className="home">
           <h1 className="app__header">Birthday Cal</h1>
 
           <div className="app__content">
@@ -63,7 +63,7 @@ export class Home extends Component {
 
                 <div className="app__actions">
                   <label>Year</label>
-                  <input className="app__input js-year" id="year-value" type="text" value="2014" />
+                  <input className="app__input js-year" id="year-value" type="text" defaultValue="2014" />
                   <a className="app__button js-update" onClick={handleUpdateClick}>Update</a>
                 </div>
 

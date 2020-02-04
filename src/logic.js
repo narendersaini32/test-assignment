@@ -11,8 +11,18 @@ const DAYS = {
 };
 
 // The below function is used to get day for the year
-function getDayForYear(dateString, year) {
-  return new Date(dateString.substring(0, dateString.lastIndexOf('/') + 1) + year).getDay();
+function getDayForYear(_date) {
+    const _format= "mm/dd/yyyy";
+  const formatLowerCase = _format.toLowerCase();
+  const formatItems = formatLowerCase.split("/");
+  const dateItems = _date.split("/");
+  const monthIndex = formatItems.indexOf('mm');
+  const dayIndex = formatItems.indexOf('dd');
+  const yearIndex = formatItems.indexOf('yyyy');
+  let month = parseInt(dateItems[monthIndex]);
+  month -= 1;
+  const formatedDate = new Date(dateItems[yearIndex], month, dateItems[dayIndex]);
+  return formatedDate.getDay();
 }
 
 // below function is used for getting initials of the name
@@ -23,11 +33,11 @@ function getInitials(nameString) {
 }
 
 // below function validate date using regex
-function validateDate(dt) {
-  const yearRegex = /^((0?[1-9]|1[012])[- /.](0?[1-9]|[12][0-9]|3[01])[- /.](19|99)?[0-9]{2})*$/;
-  return yearRegex.test(dt);
+function validateDate(s) {
+  const bits = s.split('/');
+  const d = new Date(bits[2], bits[1] - 1, bits[0]);
+  return d && (d.getMonth() + 1) == bits[1];
 }
-
 
 // below function is used to clearOldData
 function clearOldData() {
@@ -42,9 +52,10 @@ function clearOldData() {
 }
 
 // below function is used to create Div
-function createPersonDiv(name, birthday, year) {
+function createPersonDiv(name, birthday) {
   const initial = getInitials(name);
-  const day = getDayForYear(birthday, year);
+  const day = getDayForYear(birthday);
+  console.log('TCL: createPersonDiv -> day', day);
   const div = document.createElement('div');
   div.className = 'day__person';
   div.innerHTML = initial;
@@ -65,11 +76,13 @@ function responsiveMaker() {
       const rows = Math.ceil(Math.sqrt(peopleDiv.childElementCount));
       peopleDiv.style.gridTemplateColumns = `repeat(${rows}, 1fr)`;
       peopleDiv.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
-      const width = peopleDiv.lastChild.offsetWidth;
-      if (width * rows > peopleDiv.offsetWidth) {
-        const personDiv = dayCard.getElementsByClassName('day__person');
-        for (let i = 0; i < personDiv.length; i++) {
-          personDiv[i].style.fontSize = '0.30em';
+      if (peopleDiv.lastChild) {
+        const width = peopleDiv.lastChild.offsetWidth;
+        if (width * rows > peopleDiv.offsetWidth) {
+          const personDiv = dayCard.getElementsByClassName('day__person');
+          for (let i = 0; i < personDiv.length; i++) {
+            personDiv[i].style.fontSize = '0.30em';
+          }
         }
       }
     }
@@ -77,13 +90,12 @@ function responsiveMaker() {
 }
 
 // this function handles update button click
-export const  handleUpdateClick =()=> {
+export const handleUpdateClick = () => {
   clearOldData();
   const dataInput = document.getElementById('textarea-input') || {};
   const year = document.getElementById('year-value').value;
   const invalidBirthdays = [];
   let birthdayData = [];
-  const yearRegex = new RegExp('^[12][0-9]{3}$');
 
   if (dataInput.value) {
     birthdayData = eval(`(${dataInput.value})`);
@@ -92,9 +104,21 @@ export const  handleUpdateClick =()=> {
     return;
   }
 
-  if (!yearRegex.test(year)) {
-    alert('Year is invalid.');
-    return;
+  if (year.length < 4) {
+    return alert(`${year} year is not valid`);
+  }
+
+  birthdayData = birthdayData.filter(({ birthday }) => {
+    if (birthday) {
+      const dateObj = new Date(birthday);
+      if (dateObj.getFullYear && (Number(year) === dateObj.getFullYear())) {
+        return true;
+      }
+      return false;
+    }
+  });
+  if (!birthdayData.length) {
+    return alert(`No birthday in ${year}`);
   }
   birthdayData.sort((a, b) => (new Date(b.birthday) > new Date(a.birthday) ? 1 : -1));
 
@@ -107,4 +131,4 @@ export const  handleUpdateClick =()=> {
   responsiveMaker();
 
   if (invalidBirthdays.length) { alert(`Following People have invalid birthday year ${invalidBirthdays.join(', ')}`); }
-}
+};
